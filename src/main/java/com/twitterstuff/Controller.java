@@ -1,9 +1,12 @@
 package com.twitterstuff;
 
+import com.twitterstuff.model.FollowerListDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import twitter4j.TwitterException;
 
 import java.util.List;
 
@@ -17,6 +20,8 @@ import java.util.List;
 @RestController()
 @Slf4j
 public class Controller {
+
+    @Autowired TwitterService twitterService;
 
     @PutMapping("/user/{user}/follow")
     public ResponseEntity<String> followUser(@PathVariable String user){
@@ -33,10 +38,16 @@ public class Controller {
     }
 
     @GetMapping("/user/{user}/followers")
-    public ResponseEntity<List<String>> listFollowers(@PathVariable String user){
+    public ResponseEntity<Object> listFollowers(@PathVariable String user) throws Exception{
 
         log.info(String.format("GET /user/{%s}/followers", user));
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(twitterService.getFollowersOfUser(user), HttpStatus.OK);
+        }catch (TwitterException twEx){
+            return new ResponseEntity<>(twEx.toString(), HttpStatus.valueOf(twEx.getStatusCode()));
+        }catch (Exception ex){
+            return new ResponseEntity<>(ex.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/tweets/{user}")

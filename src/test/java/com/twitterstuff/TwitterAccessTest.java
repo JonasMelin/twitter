@@ -1,5 +1,6 @@
 package com.twitterstuff;
 
+import com.twitterstuff.model.FollowerListDTO;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -23,6 +24,7 @@ public class TwitterAccessTest {
 
     @Test
     public void testTwitterHelloWorld() throws Exception{
-        twitterAccess.getFollowersOfUser("Ebba Busch");
+        FollowerListDTO followersOfUser = twitterAccess.getFollowersOfUser("@melonjonas");
+
     }
 }
