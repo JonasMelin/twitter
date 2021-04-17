@@ -1,5 +1,6 @@
 package com.twitterstuff;
 
+import com.twitterstuff.config.TwitterConfig;
 import com.twitterstuff.model.FollowerListDTO;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +20,7 @@ public class TwitterAccessTest {
         MockitoAnnotations.openMocks(this);
 
         // Warning! Launches a live Twitter client! Use carfully!
-        ReflectionTestUtils.setField(twitterAccess, "twitter", new TwitterBean().getTwitterSingleton());
+        ReflectionTestUtils.setField(twitterAccess, "twitter", new TwitterConfig().getTwitterSingleton());
     }
 
     @Test

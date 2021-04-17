@@ -16,3 +16,6 @@ the following 4 variables (Get your keys here: https://developer.twitter.com/en/
 ## Launch from command line
 Make sure Java 11 is available in path. 
  * \>\> gradle bootRun
+ 
+## Endpoint Swagger documenation
+ http://127.0.0.1:8080/swagger-ui/
