@@ -1,11 +1,10 @@
 package com.twitterstuff;
 
+import com.twitterstuff.model.BaseResponseDTO;
 import com.twitterstuff.model.FollowerListDTO;
+import com.twitterstuff.model.TweetsListDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import twitter4j.TwitterException;
-
-import java.util.List;
 
 @Service
 public class TwitterService {
@@ -13,19 +12,19 @@ public class TwitterService {
     @Autowired
     private TwitterAccess twitterAccess;
 
-    public FollowerListDTO getFollowersOfUser(String user) throws TwitterException {
+    public FollowerListDTO getFollowersOfUser(String user) {
         return twitterAccess.getFollowersOfUser(user);
     }
 
-    public void followUser(String user) throws TwitterException{
-        twitterAccess.followUser(user);
+    public BaseResponseDTO followUser(String user) {
+        return twitterAccess.followUser(user);
     }
 
-    public void unfollowUser(String user) throws TwitterException{
-        twitterAccess.unfollowUser(user);
+    public BaseResponseDTO unfollowUser(String user) {
+        return twitterAccess.unfollowUser(user);
     }
 
-    public List<String> getTweets(String user, int limit) throws  TwitterException {
+    public TweetsListDTO getTweets(String user, int limit) {
         return twitterAccess.getTweets(user, limit);
     }
 }
