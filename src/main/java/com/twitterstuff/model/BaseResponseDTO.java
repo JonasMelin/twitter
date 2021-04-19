@@ -16,12 +16,12 @@ public class BaseResponseDTO {
         this.twitterStatus = HttpStatus.valueOf(httpStatus);
     }
 
-    @ApiModelProperty(example = "false")
+    @ApiModelProperty(example = "true")
     private boolean success = true;
     @NonNull
-    @ApiModelProperty(example = "user not found")
+    @ApiModelProperty(example = "Everyhing works great!")
     private String debugMessage = "";
     @NonNull
-    @ApiModelProperty(example = "NOT_FOUND")
+    @ApiModelProperty(example = "OK")
     private HttpStatus twitterStatus = HttpStatus.OK;
 }

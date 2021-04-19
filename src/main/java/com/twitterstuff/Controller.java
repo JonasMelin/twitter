@@ -3,8 +3,7 @@ package com.twitterstuff;
 import com.twitterstuff.model.BaseResponseDTO;
 import com.twitterstuff.model.FollowerListDTO;
 import com.twitterstuff.model.TweetsListDTO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,16 +23,17 @@ public class Controller {
     @Autowired
     TwitterService twitterService;
 
-    @ApiOperation(value = "Follow a user", response = String.class, tags = "Follow",
-            notes = "user shall be the screenName, i.e. @finalcialtimes")
+    @ApiOperation(value = "Follow a user", response = String.class, tags = "Follow")
+    @ApiResponses(value = {@ApiResponse(code = 500, message = "Server error", response = BaseResponseDTO.class)})
 
     @PutMapping("/user/{user}/follow")
-    public ResponseEntity<BaseResponseDTO> followUser(@PathVariable String user) {
+    public ResponseEntity<BaseResponseDTO> followUser(
+            @ApiParam(value = "user shall be the screenName", example = "@financialtimes")
+            @PathVariable String user) {
 
         log.info(String.format("followUser: %s", user));
         try {
-            twitterService.followUser(user);
-            return new ResponseEntity<>(new BaseResponseDTO(), HttpStatus.OK);
+            return new ResponseEntity<>(twitterService.followUser(user), HttpStatus.OK);
         } catch (Exception ex) {
             log.error(String.format("followUser: %s, %s", user, ex.toString()));
             return new ResponseEntity<>(new BaseResponseDTO(ex.toString(),
@@ -42,16 +42,17 @@ public class Controller {
         }
     }
 
-    @ApiOperation(value = "Un-follow a user", response = String.class, tags = "Unfollow",
-            notes = "user shall be the screenName, i.e. @finalcialtimes")
+    @ApiOperation(value = "Un-follow a user", response = String.class, tags = "Unfollow")
+    @ApiResponses(value = {@ApiResponse(code = 500, message = "Server error", response = BaseResponseDTO.class)})
 
     @PutMapping("/user/{user}/unfollow")
-    public ResponseEntity<BaseResponseDTO> unfollowUser(@PathVariable String user) {
+    public ResponseEntity<BaseResponseDTO> unfollowUser(
+            @ApiParam(value = "user shall be the screenName", example = "@financialtimes")
+            @PathVariable String user) {
 
         log.info(String.format("unfollowUser: %s", user));
         try {
-            twitterService.unfollowUser(user);
-            return new ResponseEntity<>(new BaseResponseDTO(), HttpStatus.OK);
+            return new ResponseEntity<>(twitterService.unfollowUser(user), HttpStatus.OK);
         } catch (Exception ex) {
             log.error(String.format("unfollowUser: %s, %s", user, ex.toString()));
             return new ResponseEntity<>(new BaseResponseDTO(ex.toString(),
@@ -60,11 +61,13 @@ public class Controller {
         }
     }
 
-    @ApiOperation(value = "List followers of a user", response = String.class, tags = "list followers",
-            notes = "user shall be the screenName, i.e. @finalcialtimes")
+    @ApiOperation(value = "List followers of a user", response = String.class, tags = "list followers")
+    @ApiResponses(value = {@ApiResponse(code = 500, message = "Server error", response = BaseResponseDTO.class)})
 
     @GetMapping("/user/{user}/followers")
-    public ResponseEntity<FollowerListDTO> listFollowers(@PathVariable String user) {
+    public ResponseEntity<FollowerListDTO> listFollowers(
+            @ApiParam(value = "user shall be the screenName", example = "@financialtimes")
+            @PathVariable String user) {
 
         log.info(String.format("listFollowers: %s", user));
         try {
@@ -77,11 +80,17 @@ public class Controller {
         }
     }
 
-    @ApiOperation(value = "List tweets of a user", response = String.class, tags = "list tweets",
-            notes = "user shall be the screenName, i.e. @finalcialtimes")
+    @ApiOperation(value = "List tweets of a user", response = String.class, tags = "list tweets")
+    @ApiResponses(value = {
+            @ApiResponse(code = 500, message = "Server error", response = BaseResponseDTO.class),
+            @ApiResponse(code = 416, message = "Range not satisfiable", response = BaseResponseDTO.class)})
 
-    @GetMapping("/tweets/{user}/{limit}")
-    public ResponseEntity<TweetsListDTO> getTweetsFromUser(@PathVariable String user, @PathVariable int limit) {
+    @GetMapping("/user/{user}/tweets/{limit}")
+    public ResponseEntity<TweetsListDTO> getTweetsFromUser(
+            @ApiParam(value = "user shall be the screenName", example = "@financialtimes")
+            @PathVariable String user,
+            @ApiParam(value = "limit the returned number of tweets. Max allowed: " + MAX_LIMIT, example = "10")
+            @PathVariable int limit) {
 
         log.info(String.format("getTweetsFromUser: %s, limit: %d", user, limit));
 
