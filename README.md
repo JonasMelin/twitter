@@ -13,9 +13,16 @@ the following 4 variables (Get your keys here: https://developer.twitter.com/en/
 * oauth.accessToken=********************
 * oauth.accessTokenSecret=********************
 
+## Build from command line
+ * \>\> gradle clean build
+
 ## Launch from command line
 Make sure Java 11 is available in path. 
  * \>\> gradle bootRun
  
 ## Endpoint Swagger documenation
  http://127.0.0.1:8080/swagger-ui/
+ 
+## Building and running the service as a Docker container
+ * \>\> docker build --build-arg JAR_FILE=build/libs/\*.jar -t springio/gs-spring-boot-docker .
+ * \>\> docker run --rm --network host -p 8080:8080 springio/gs-spring-boot-docker:latest

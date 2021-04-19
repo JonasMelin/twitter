@@ -2,21 +2,20 @@ package com.twitterstuff;
 
 import com.twitterstuff.config.TwitterConfig;
 import com.twitterstuff.model.FollowerListDTO;
+import com.twitterstuff.model.TweetsListDTO;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.util.ReflectionTestUtils;
-import twitter4j.ResponseList;
-import twitter4j.Status;
 import twitter4j.TwitterException;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
+@Disabled
 public class TwitterAccessTest {
 
     @InjectMocks
@@ -51,6 +50,6 @@ public class TwitterAccessTest {
 
     @Test
     public void testgetTweets() throws TwitterException {
-        List<String> tweets = twitterAccess.getTweets("@financialtimes", 115);
+        TweetsListDTO tweets = twitterAccess.getTweets("@financialtimes", 115);
     }
 }

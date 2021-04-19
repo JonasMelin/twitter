@@ -24,7 +24,7 @@ public class TwitterAccess {
     public FollowerListDTO getFollowersOfUser(String user) {
         try {
             return new FollowerListDTO(twitter.getFollowersList(user, -1));
-        }catch (TwitterException twEx){
+        } catch (TwitterException twEx) {
             return new FollowerListDTO(twEx.getMessage(), twEx.getStatusCode());
         }
     }
@@ -33,7 +33,7 @@ public class TwitterAccess {
         try {
             twitter.createFriendship(user);
             return new BaseResponseDTO();
-        }catch (TwitterException twEx){
+        } catch (TwitterException twEx) {
             return new BaseResponseDTO(twEx.toString(), twEx.getStatusCode());
         }
     }
@@ -42,7 +42,7 @@ public class TwitterAccess {
         try {
             twitter.destroyFriendship(user);
             return new BaseResponseDTO();
-        }catch (TwitterException twEx){
+        } catch (TwitterException twEx) {
             return new BaseResponseDTO(twEx.toString(), twEx.getStatusCode());
         }
     }
@@ -69,7 +69,7 @@ public class TwitterAccess {
 
             return new TweetsListDTO(allTweets);
 
-        }catch (TwitterException twEx){
+        } catch (TwitterException twEx) {
             return new TweetsListDTO(twEx.getMessage(), twEx.getErrorCode());
         }
     }

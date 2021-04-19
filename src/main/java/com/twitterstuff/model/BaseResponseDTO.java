@@ -10,15 +10,18 @@ import org.springframework.http.HttpStatus;
 @NoArgsConstructor
 public class BaseResponseDTO {
 
-    public BaseResponseDTO(String message, int httpStatus){
+    public BaseResponseDTO(String message, int httpStatus) {
+        this.success = false;
         this.debugMessage = message;
-        this.twitterStatus = httpStatus;
+        this.twitterStatus = HttpStatus.valueOf(httpStatus);
     }
 
+    @ApiModelProperty(example = "false")
+    private boolean success = true;
     @NonNull
     @ApiModelProperty(example = "user not found")
     private String debugMessage = "";
     @NonNull
-    @ApiModelProperty(example = "404")
-    private int twitterStatus = HttpStatus.OK.value();
+    @ApiModelProperty(example = "NOT_FOUND")
+    private HttpStatus twitterStatus = HttpStatus.OK;
 }

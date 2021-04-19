@@ -15,11 +15,11 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 public class FollowerListDTO extends BaseResponseDTO {
 
-    public FollowerListDTO(String message, int httpStatus){
+    public FollowerListDTO(String message, int httpStatus) {
         super(message, httpStatus);
     }
 
-    public FollowerListDTO(PagableResponseList<User> userList){
+    public FollowerListDTO(PagableResponseList<User> userList) {
         super();
         userList.forEach(u -> followers.add(new UserData(u.getName(), u.getScreenName(), u.getId())));
     }
@@ -29,7 +29,7 @@ public class FollowerListDTO extends BaseResponseDTO {
 
     @Data
     @AllArgsConstructor
-    private static class UserData{
+    private static class UserData {
         @ApiModelProperty(example = "Financial Times")
         private String userName;
         @ApiModelProperty(example = "@financialtimes")

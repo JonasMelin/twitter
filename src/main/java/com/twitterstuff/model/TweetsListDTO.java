@@ -12,9 +12,9 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
-public class TweetsListDTO extends BaseResponseDTO{
+public class TweetsListDTO extends BaseResponseDTO {
 
-    public TweetsListDTO(String message, int httpStatus){
+    public TweetsListDTO(String message, int httpStatus) {
         super(message, httpStatus);
     }
 
