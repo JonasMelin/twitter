@@ -21,7 +21,7 @@ public class FollowerListDTO extends BaseResponseDTO {
 
     public FollowerListDTO(PagableResponseList<User> userList) {
         super();
-        userList.forEach(u -> followers.add(new UserData(u.getName(), u.getScreenName(), u.getId())));
+        userList.stream().forEach(u -> followers.add(new UserData(u.getName(), u.getScreenName(), u.getId())));
     }
 
     @NonNull
@@ -29,7 +29,7 @@ public class FollowerListDTO extends BaseResponseDTO {
 
     @Data
     @AllArgsConstructor
-    private static class UserData {
+    public static class UserData {
         @ApiModelProperty(example = "Financial Times")
         private String userName;
         @ApiModelProperty(example = "@financialtimes")

@@ -10,9 +10,7 @@ import twitter4j.*;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -71,7 +69,7 @@ public class TwitterRepository {
             return new TweetsListDTO(allTweets);
 
         } catch (TwitterException twEx) {
-            return new TweetsListDTO(twEx.getMessage(), twEx.getErrorCode());
+            return new TweetsListDTO(twEx.getMessage(), twEx.getStatusCode());
         }
     }
 }

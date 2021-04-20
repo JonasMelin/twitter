@@ -1,5 +1,6 @@
 package com.twitterstuff;
 
+import com.twitterstuff.model.BaseResponseDTO;
 import com.twitterstuff.model.FollowerListDTO;
 import com.twitterstuff.model.TweetsListDTO;
 import org.junit.Before;
@@ -8,24 +9,24 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
-import twitter4j.ResponseList;
-import twitter4j.Status;
-import twitter4j.Twitter;
-import twitter4j.TwitterException;
+import org.springframework.http.HttpStatus;
+import twitter4j.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 public class TwitterRepositoryTest {
+
+    private final int PAGE_SIZE = 10;
+    private final String USER = "@financialtimes";
+    private final HttpStatus twitterHttpErrorStatus = HttpStatus.NOT_FOUND;
+    private final String twitterErrorMessage = "Something went wrong";
 
     @InjectMocks
     private TwitterRepository twitterRepository;
@@ -33,69 +34,144 @@ public class TwitterRepositoryTest {
     @Mock
     private Twitter twitter;
 
-
     @Before
     public void setup() {
         MockitoAnnotations.openMocks(this);
-
-        // Warning! Launches a live Twitter client! Use carfully!
-        //ReflectionTestUtils.setField(twitterAccess, "twitter", new TwitterConfig().getTwitterSingleton());
     }
 
     @Test
-    public void testTwitterHelloWorld() throws TwitterException {
-        FollowerListDTO followersOfUser = twitterRepository.getFollowersOfUser("@melonjonas");
+    public void testFollowUserOK() throws TwitterException {
+
+        when(twitter.createFriendship(eq(USER))).thenReturn(null);
+        BaseResponseDTO baseResponseDTO = twitterRepository.followUser(USER);
+
+        assertNotNull(baseResponseDTO);
+        assertTrue(baseResponseDTO.isSuccess());
+    }
+
+    @Test
+    public void testFollowUserError() throws TwitterException {
+
+        TwitterException twEx = new TwitterException(twitterErrorMessage, new Exception(), twitterHttpErrorStatus.value());
+        when(twitter.createFriendship(eq(USER))).thenThrow(twEx);
+        BaseResponseDTO baseResponseDTO = twitterRepository.followUser(USER);
+
+        assertNotNull(baseResponseDTO);
+        assertFalse(baseResponseDTO.isSuccess());
+        assertFalse(baseResponseDTO.getDebugMessage().isEmpty());
+        assertEquals(twitterHttpErrorStatus, baseResponseDTO.getTwitterStatus());
+    }
+
+    @Test
+    public void testUnfollowUserOK() throws TwitterException {
+
+        when(twitter.destroyFriendship(eq(USER))).thenReturn(null);
+        BaseResponseDTO baseResponseDTO = twitterRepository.unfollowUser(USER);
+
+        assertNotNull(baseResponseDTO);
+        assertTrue(baseResponseDTO.isSuccess());
+    }
+
+    @Test
+    public void testUnfollowUserError() throws TwitterException {
+
+        TwitterException twEx = new TwitterException(twitterErrorMessage, new Exception(), twitterHttpErrorStatus.value());
+        when(twitter.destroyFriendship(eq(USER))).thenThrow(twEx);
+        BaseResponseDTO baseResponseDTO = twitterRepository.unfollowUser(USER);
+
+        assertNotNull(baseResponseDTO);
+        assertFalse(baseResponseDTO.isSuccess());
+        assertFalse(baseResponseDTO.getDebugMessage().isEmpty());
+        assertEquals(twitterHttpErrorStatus, baseResponseDTO.getTwitterStatus());
+    }
+
+    @Test
+    public void testGetFollowersOfUserOK() throws TwitterException {
+
+        final int USER_COUNT = 2;
+        List<User> twitterResultList = new ArrayList<>();
+        PagableResponseList<User> responseListMock = mock(PagableResponseList.class);
+
+        for (int a = 0; a < USER_COUNT; a++) {
+            User userMock = mock(User.class);
+            when(userMock.getName()).thenReturn("Nisse " + a);
+            when(userMock.getScreenName()).thenReturn("@nisse" + a);
+            when(userMock.getId()).thenReturn(12345L + a);
+
+            twitterResultList.add(userMock);
+        }
+        when(responseListMock.stream()).thenReturn(twitterResultList.stream());
+        when(twitter.getFollowersList(eq(USER), anyLong())).thenReturn(responseListMock);
+
+        FollowerListDTO followersOfUser = twitterRepository.getFollowersOfUser(USER);
 
         assertNotNull(followersOfUser);
+        assertTrue(followersOfUser.isSuccess());
+        assertEquals(twitterResultList.size(), followersOfUser.getFollowers().size());
+        assertTrue(followersOfUser.getFollowers().stream().map(t -> t.getUserName()).collect(Collectors.toSet())
+                .containsAll(twitterResultList.stream().map(u -> u.getName()).collect(Collectors.toSet())));
     }
 
     @Test
-    public void testFollowUser() throws TwitterException {
+    public void testGetFollowersOfUserError() throws TwitterException {
 
-        twitterRepository.followUser("@financialtimes");
-    }
+        TwitterException twEx = new TwitterException(twitterErrorMessage, new Exception(), twitterHttpErrorStatus.value());
+        when(twitter.getFollowersList(eq(USER), anyLong())).thenThrow(twEx);
+        FollowerListDTO followersOfUser = twitterRepository.getFollowersOfUser(USER);
 
-    @Test
-    public void testUnfollowUser() throws TwitterException {
-
-        twitterRepository.unfollowUser("@financialtimes");
+        assertNotNull(followersOfUser);
+        assertFalse(followersOfUser.isSuccess());
+        assertFalse(followersOfUser.getDebugMessage().isEmpty());
+        assertEquals(twitterHttpErrorStatus, followersOfUser.getTwitterStatus());
     }
 
     @Test
     public void testgetTweetsOK() throws TwitterException {
 
-        final int PAGE_SIZE = 10;
-        final int LIMIT = 17;
-        String user = "@financialtimes";
-        List<Status> mockedTwitterResultList1 = new ArrayList<>();
-        List<Status> mockedTwitterResultList2 = new ArrayList<>();
+        final int LIMIT = PAGE_SIZE * 2 - 3;
 
-        Status status1 = mock(Status.class);
-        when(status1.getText()).thenReturn("Nice little tweets in page 1!");
-        Status status2 = mock(Status.class);
-        when(status2.getText()).thenReturn("Nice little tweets in page 2!");
+        List<Status> twitterResultList1 = new ArrayList<>();
+        List<Status> twitterResultList2 = new ArrayList<>();
 
         for (int a = 0; a < PAGE_SIZE; a++) {
-            mockedTwitterResultList1.add(status1);
-            mockedTwitterResultList2.add(status2);
+            Status statusMock1 = mock(Status.class);
+            when(statusMock1.getText()).thenReturn(String.format("Nice little tweet %d, (Page 1) ", a + 1));
+            twitterResultList1.add(statusMock1);
+
+            Status statusMock2 = mock(Status.class);
+            when(statusMock2.getText()).thenReturn(String.format("Nice little tweet %d, (Page 2) ", a + 1));
+            twitterResultList2.add(statusMock2);
         }
 
-        ResponseList<Status> userTimelinePage1 = mock(ResponseList.class);
-        when(userTimelinePage1.stream()).thenReturn(mockedTwitterResultList1.stream());
-        when(userTimelinePage1.size()).thenReturn(mockedTwitterResultList1.size());
-        ResponseList<Status> userTimelinePage2 = mock(ResponseList.class);
-        when(userTimelinePage2.stream()).thenReturn(mockedTwitterResultList2.stream());
-        when(userTimelinePage2.size()).thenReturn(mockedTwitterResultList2.size());
+        ResponseList<Status> userTimelinePage1Mock = mock(ResponseList.class);
+        when(userTimelinePage1Mock.stream()).thenReturn(twitterResultList1.stream());
+        when(userTimelinePage1Mock.size()).thenReturn(twitterResultList1.size());
+        ResponseList<Status> userTimelinePage2Mock = mock(ResponseList.class);
+        when(userTimelinePage2Mock.stream()).thenReturn(twitterResultList2.stream());
+        when(userTimelinePage2Mock.size()).thenReturn(twitterResultList2.size());
 
-        when(twitter.getUserTimeline(eq(user), argThat(page -> page.getPage() == 1))).thenReturn(userTimelinePage1);
-        when(twitter.getUserTimeline(eq(user), argThat(page -> page.getPage() == 2))).thenReturn(userTimelinePage2);
+        when(twitter.getUserTimeline(eq(USER), argThat(page -> page.getPage() == 1))).thenReturn(userTimelinePage1Mock);
+        when(twitter.getUserTimeline(eq(USER), argThat(page -> page.getPage() == 2))).thenReturn(userTimelinePage2Mock);
 
-        TweetsListDTO retVal = twitterRepository.getTweets(user, LIMIT);
+        TweetsListDTO retVal = twitterRepository.getTweets(USER, LIMIT);
 
         assertNotNull(retVal);
         assertTrue(retVal.isSuccess());
         assertEquals(LIMIT, retVal.getTweets().size());
-        assertTrue(retVal.getTweets().containsAll(mockedTwitterResultList1
+        assertTrue(retVal.getTweets().containsAll(twitterResultList1
                 .stream().map(Status::getText).collect(Collectors.toSet())));
+    }
+
+    @Test
+    public void testGetTweetsError() throws TwitterException {
+
+        TwitterException twEx = new TwitterException(twitterErrorMessage, new Exception(), twitterHttpErrorStatus.value());
+        when(twitter.getUserTimeline(eq(USER), argThat(page -> page.getPage() == 1))).thenThrow(twEx);
+        TweetsListDTO retVal = twitterRepository.getTweets(USER, 10);
+
+        assertNotNull(retVal);
+        assertFalse(retVal.isSuccess());
+        assertFalse(retVal.getDebugMessage().isEmpty());
+        assertEquals(twitterHttpErrorStatus, retVal.getTwitterStatus());
     }
 }
