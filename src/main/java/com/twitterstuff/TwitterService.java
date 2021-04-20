@@ -10,21 +10,21 @@ import org.springframework.stereotype.Service;
 public class TwitterService {
 
     @Autowired
-    private TwitterAccess twitterAccess;
+    private TwitterRepository twitterRepository;
 
     public FollowerListDTO getFollowersOfUser(String user) {
-        return twitterAccess.getFollowersOfUser(user);
+        return twitterRepository.getFollowersOfUser(user);
     }
 
     public BaseResponseDTO followUser(String user) {
-        return twitterAccess.followUser(user);
+        return twitterRepository.followUser(user);
     }
 
     public BaseResponseDTO unfollowUser(String user) {
-        return twitterAccess.unfollowUser(user);
+        return twitterRepository.unfollowUser(user);
     }
 
     public TweetsListDTO getTweets(String user, int limit) {
-        return twitterAccess.getTweets(user, limit);
+        return twitterRepository.getTweets(user, limit);
     }
 }

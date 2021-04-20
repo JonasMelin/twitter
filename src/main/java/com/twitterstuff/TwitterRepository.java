@@ -10,11 +10,13 @@ import twitter4j.*;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
-public class TwitterAccess {
+public class TwitterRepository {
 
     final static int PAGE_SIZE = 50;
 
@@ -57,7 +59,6 @@ public class TwitterAccess {
             while (true) {
                 ResponseList<Status> userTimeline = twitter.getUserTimeline(user, paging);
                 List<String> nextPage = userTimeline.stream().map(Status::getText).collect(Collectors.toList());
-
                 allTweets.addAll(nextPage.subList(0, Math.min(limit - allTweets.size(), nextPage.size())));
 
                 if (nextPage.size() == 0 || allTweets.size() >= limit) {
