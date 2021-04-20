@@ -33,7 +33,8 @@ public class Controller {
 
         log.info(String.format("followUser: %s", user));
         try {
-            return new ResponseEntity<>(twitterService.followUser(user), HttpStatus.OK);
+            //return new ResponseEntity<>(twitterService.followUser(user), HttpStatus.OK);  // Todo: un-comment this line to actually subscribe ;-)
+            return new ResponseEntity<>(new BaseResponseDTO(), HttpStatus.OK);
         } catch (Exception ex) {
             log.error(String.format("followUser: %s, %s", user, ex.toString()));
             return new ResponseEntity<>(new BaseResponseDTO(ex.toString(),
